@@ -15,11 +15,16 @@
 	.tabl-wrapper table thead th {
 		cursor: default;
 	}
+	
+	.tabl-prev-button,
+	.tabl-next-button {
+		cursor: pointer;
+	}
 </style>
 <div class="tabl-wrapper">
-<table class="sorter" data-rows-per-page="2">
+<table class="sorter">
 <thead>
-	<th data-col-type="int" data-dir="asc"">Column 1</th>
+	<th data-col-type="int">Column 1</th>
 	<th data-col-type="str">Column 2</th>
 	<th data-col-type="date">Column 3</th>
 	<th data-col-type="str">Column 4</th>
@@ -80,16 +85,21 @@ Tabl.prototype = {
 	init: function() {
 		this.totalRowCount = this.getTotalRowCount();
 		this.addSortHandlers();
+		this.initPageState();
 		this.initPagination();
+		this.addSortHeaderIcon(this.options.sortCol, this.options.sortDir);
 		this.showCurrentPage();
 	},
 	
-	showCurrentPage: function() {
+	showCurrentPage: function(changeState = true) {
 		var that = this,
 				col = that.options.sortCol;
 		
 		that.sortRows(col, that.getSortType(col), that.options.sortDir);
 		that.showPagination();
+		if (changeState) {
+			that.changePageState();
+		}
 	},
 	
 	getSortType: function(col) {
@@ -167,7 +177,7 @@ Tabl.prototype = {
 		
 		prevButton.style.visibility = that.options.currentPage === 1 ? 'hidden' : 'visible';
 		
-		if ((that.options.currentPage * that.options.rowsPerPage) > that.totalRowCount) {
+		if ((that.options.currentPage * that.options.rowsPerPage) >= that.totalRowCount) {
 			nextButton.style.visibility = 'hidden';
 		} else {
 			nextButton.style.visibility = 'visible';
@@ -310,10 +320,10 @@ Tabl.prototype = {
 			});
 		}
 	
-		if (type === "str") {
+		if (type === 'str') {
 			rows.sort(function(a, b) {
 				// just reverse a & b if descending
-				if(dir == "desc") {
+				if (dir == 'desc') {
 					var txtA = b.val.toLowerCase(), txtB = a.val.toLowerCase();
 				} else {
 					var txtA = a.val.toLowerCase(), txtB = b.val.toLowerCase();
@@ -327,16 +337,28 @@ Tabl.prototype = {
 			});
 		}
 
-		if (type === "int") {
+		if (type === 'int') {
 			rows.sort(function(a, b) {
 				// just reverse a & b if descending
-				if(dir == "desc") {
+				if (dir == 'desc') {
 					var numA = parseInt(b.val), numB = parseInt(a.val);
 				} else {
 					var numA = parseInt(a.val), numB = parseInt(b.val);
 				}
 
 				return (numA - numB);
+			});
+		}
+		
+		if (type === 'date') {
+			rows.sort(function(a, b) {
+				if (dir == 'desc') {
+					var dateA = new Date(b.val).getTime(), dateB = new Date(a.val).getTime();
+				} else {
+					var dateA = new Date(a.val).getTime(), dateB = new Date(b.val).getTime();
+				}
+				
+				return (dateA - dateB);
 			});
 		}
 		
@@ -362,6 +384,37 @@ Tabl.prototype = {
 					tbody = that.table.tBodies[0];
 		
 			return tbody.rows.length;
+	},
+	
+	initPageState: function() {
+		var that = this;
+		
+		if (history.state !== null) {
+			that.options.sortCol = history.state.sortCol;
+			that.options.sortDir = history.state.sortDir;
+			that.options.currentPage = history.state.currentPage;
+		}
+		
+		window.onpopstate = function() {
+			if (typeof history.state !== 'undefined' && history.state !== null) {
+				that.options.sortCol = history.state.sortCol;
+				that.options.sortDir = history.state.sortDir;
+				that.options.currentPage = history.state.currentPage;
+				that.addSortHeaderIcon(that.options.sortCol, that.options.sortDir);
+				that.showCurrentPage(false);
+			}
+		};
+	},
+	 
+	changePageState: function() {
+		var that = this,
+			tableState = {
+				sortCol: that.options.sortCol,
+				sortDir: that.options.sortDir,
+				currentPage: that.options.currentPage
+			};
+
+		history.pushState(tableState, null, null);
 	},
 	
 	mergeOptions: function (obj1, obj2) {
