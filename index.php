@@ -71,7 +71,8 @@ function Tablr(table, options) {
 				sortAsc: 'fa fa-caret-up',
 				sortDesc: 'fa fa-caret-down'
 			},
-		}
+		},
+		pageChangeCallback: null
 	};
 	
 	that.options = that.mergeOptions(defaults, options);
@@ -197,12 +198,20 @@ Tablr.prototype = {
 		var that = this;
 		that.options.currentPage -= 1;
 		that.showCurrentPage();
+		
+		if (that.options.pageChangeCallback !== null) {
+			that.options.pageChangeCallback();
+		}
 	},
 
 	nextPage: function() {
 		var that = this;
 		that.options.currentPage += 1;
 		that.showCurrentPage();
+		
+		if (that.options.pageChangeCallback !== null) {
+			that.options.pageChangeCallback();
+		}
 	},
 		
 	addSortHandlers: function() {
