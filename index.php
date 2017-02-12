@@ -52,7 +52,7 @@
 </table>
 </div>
 <script>
-function Tabl(table, options) {
+function Tablr(table, options) {
 	var that = this,
 	defaults = {
 		sortCol: 0,
@@ -81,7 +81,7 @@ function Tabl(table, options) {
 	that.init();
 }
 
-Tabl.prototype = {
+Tablr.prototype = {
 	init: function() {
 		this.totalRowCount = this.getTotalRowCount();
 		this.addSortHandlers();
@@ -419,8 +419,8 @@ Tabl.prototype = {
 	
 	mergeOptions: function (obj1, obj2) {
 		var obj3 = {};
-		for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
-		for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+		for (var attrName in obj1) { obj3[attrName] = obj1[attrName]; }
+		for (var attrName in obj2) { obj3[attrName] = obj2[attrName]; }
 		return obj3;
 	}
 };
@@ -431,7 +431,7 @@ for (var i=0; i < tables.length; i++) {
 	var defaults = {
 		rowsPerPage: 2
 	};
-	var myTable = new Tabl(tables[i], defaults);
+	var myTable = new Tablr(tables[i], defaults);
 }
 
 </script>
